@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# Kompajliraj projekt
+# compile decompression
 make -C src/decompress
 
-# Provjeri je li kompajlacija uspjela
+# compile decompression
 if [ $? -ne 0 ]; then
     echo "Build failed. Exiting."
     exit 1
 fi
 
-# Pokreni program
+# run decompression
 ./src/decompress/decompressor
+
+# author: Mateo Jakšić

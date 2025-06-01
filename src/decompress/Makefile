@@ -1,3 +1,4 @@
+# automatization of build process
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall
 
@@ -15,3 +16,5 @@ $(BIN): $(OBJ)
 
 clean:
 	rm -f $(OBJ) $(BIN)
+
+# author: Mateo Jakšić

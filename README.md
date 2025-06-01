@@ -34,8 +34,6 @@ chmod +x run_decompress.sh
 ./run_decompress.sh
 ```
 
-
-
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).

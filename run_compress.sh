@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# Kompajliraj projekt
+# compile compression
 make -C src/compress
 
-# Provjeri je li kompajlacija uspjela
+# compile compression
 if [ $? -ne 0 ]; then
     echo "Build failed. Exiting."
     exit 1
 fi
 
-# Pokreni program
+# run compression
 ./src/compress/compressor
+
+# author: Mateo Jakšić
