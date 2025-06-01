@@ -8,8 +8,8 @@ This project was developed as part of the **Bioinformatics 1** course.
 
 The main reference for the project is the following scientific article:
 
-> Pertea, M., Kim, D., Pertea, G.M., Leek, J.T., & Salzberg, S.L. (2016). *Transcript-level expression analysis of RNA-seq experiments with HISAT, StringTie and Ballgown*. Bioinformatics, 33(21), 3364–3370.  
-> [Link to the article](https://academic.oup.com/bioinformatics/article/33/21/3364/3885699?login=true)
+> Yuansheng Liu, Hui Peng, Limsoon Wong, Jinyan Li, High-speed and high-ratio referential genome compression, Bioinformatics, Volume 33, Issue 21, November 012017, Pages 3364–3372, 
+> [Link to the article](https://academic.oup.com/bioinformatics/article/33/21/3364/3885699?login=true) 
 
 ## How to run
 
