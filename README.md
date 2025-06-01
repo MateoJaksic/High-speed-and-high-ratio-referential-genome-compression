@@ -1,4 +1,4 @@
-# Genome compression and decompression algorithm
+# High-speed and high-ratio referential genome compression
 
 ## About the Project
 
@@ -16,8 +16,8 @@ The main reference for the project is the following scientific article:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/MateoJaksic/Genome-compression-and-decompression-algorithm.git
-cd Genome-compression-and-decompression-algorithm
+git clone https://github.com/MateoJaksic/High-speed-and-high-ratio-referential-genome-compression.git
+cd High-speed-and-high-ratio-referential-genome-compression
 ```
 
 2. Give execution permissions
