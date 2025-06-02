@@ -10,6 +10,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # run decompression
-./src/decompress/decompressor
+./src/decompress/decompressor > "./decompress_output"
 
 # author: Mateo Jakšić

@@ -10,6 +10,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # run compression
-./src/compress/compressor
+./src/compress/compressor > "./compress_output"
 
 # author: Mateo Jakšić
