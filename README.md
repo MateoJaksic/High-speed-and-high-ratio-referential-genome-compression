@@ -30,8 +30,15 @@ chmod +x run_decompress.sh
 3. Run scripts
 
 ```bash
-./run_compress.sh
-./run_decompress.sh
+./run_compress.sh -r reference_file -t target_file -o output_file
+./run_decompress.sh -r reference_file -c compressed_file -o output_file
+```
+
+4. Run scripts with real data (using ASM1038v1 target genome)
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM1038v1.fna -o compress_output.txt
+./run_decompress.sh -r data/reference.fna -c compress_output.txt -o decompress_output.txt
 ```
 
 ## License
