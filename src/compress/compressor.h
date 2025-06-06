@@ -1,6 +1,8 @@
 #ifndef COMPRESSOR_H
 #define COMPRESSOR_H
 
-void say_hello_compress();
+#include <string>
+
+void compress(const std::string& reference, const std::string& target);
 
 #endif

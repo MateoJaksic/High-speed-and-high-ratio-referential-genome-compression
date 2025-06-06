@@ -1,8 +1,10 @@
+# author: Mateo Jakšić
 # automatization of build process
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -Wall
+INCLUDES = -I../utils
+CXXFLAGS = -std=c++17 -O2 -Wall $(INCLUDES)
 
-SRC = main.cpp compressor.cpp
+SRC = main.cpp compressor.cpp ../utils/utils.cpp
 OBJ = $(SRC:.cpp=.o)
 BIN = compressor
 
@@ -12,9 +14,7 @@ $(BIN): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ) $(BIN)
-
-# author: Mateo Jakšić
