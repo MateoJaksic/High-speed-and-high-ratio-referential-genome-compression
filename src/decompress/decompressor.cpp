@@ -1,6 +1,11 @@
-#include <iostream>
 #include "decompressor.h"
 
-void say_hello_decompress() {
-    std::cout << "Hello from decompressor!" << std::endl;
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+void decompress(const string& reference, const string& compressed) {
+    cout << "Reference is: " << reference << "\n";
+    cout << "Compressed is: " << compressed << "\n";
 }
