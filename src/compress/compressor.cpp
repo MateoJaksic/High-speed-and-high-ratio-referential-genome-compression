@@ -18,16 +18,8 @@ void compress(const string& reference, const string& target) {
     string reference_nucleotides_sequence = read_sequence(reference);
     string target_nucleotides_sequence = read_sequence(target);
     
-    pair<vector<uint8_t>, uint8_t> reference_pair = nucleotides_to_numbers(reference_nucleotides_sequence);
-    vector<uint8_t> reference_values = reference_pair.first;
-    uint8_t reference_leftovers = reference_pair.second;
+    pair<vector<uint8_t>, int> reference_pair = nucleotides_to_numbers(reference_nucleotides_sequence);
+    pair<vector<uint8_t>, int> target_pair = nucleotides_to_numbers(target_nucleotides_sequence);
 
-    pair<vector<uint8_t>, uint8_t> target_pair = nucleotides_to_numbers(target_nucleotides_sequence);
-    vector<uint8_t> target_values = target_pair.first;
-    uint8_t target_leftovers = target_pair.second;
-
-    // write_numbers(reference_values, reference_leftovers);
-    // write_numbers(target_values, target_leftovers);
-
-    greedy_hash_table_matching(reference_values, target_values, 16);
+    greedy_hash_table_matching(reference_pair.first, target_pair.first, 4, target_pair.second);
 }

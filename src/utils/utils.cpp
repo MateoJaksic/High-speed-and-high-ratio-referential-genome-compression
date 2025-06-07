@@ -51,9 +51,7 @@ uint8_t convert_nucleotide_to_number(const char& nucleotide) {
 
 // author: Mateo Jakšić
 // function for converting from nucleotides (A, C, G, T) to numbers (0, 1, 2, 3)
-// quick explanation: we want to use 2-bit integers for representing nucleotides, but since is
-//                    doesn't exist in C++, we pack four or less 2-bit integers into a single uint8_t
-pair<vector<uint8_t>, uint8_t> nucleotides_to_numbers(const string& sequence) {
+pair<vector<uint8_t>, int> nucleotides_to_numbers(const string& sequence) {
     vector<uint8_t> encoded;
     encoded.reserve((sequence.size() + 3) / 4);
 
@@ -61,8 +59,7 @@ pair<vector<uint8_t>, uint8_t> nucleotides_to_numbers(const string& sequence) {
     int count = 0;
 
     for(char nucleotide : sequence) {
-        uint8_t value = convert_nucleotide_to_number(nucleotide);
-        byte = (byte << 2) | value;
+        byte = (byte << 2) | convert_nucleotide_to_number(nucleotide);
         count++;
 
         if (count == 4) {
@@ -72,14 +69,12 @@ pair<vector<uint8_t>, uint8_t> nucleotides_to_numbers(const string& sequence) {
         }
     }
 
-    uint8_t leftovers = 0;
     if (count > 0) {
-        leftovers = 2 * (4 - count);
-        byte = byte << leftovers;
+        byte = byte << (2 * (4 - count));
         encoded.push_back(byte);
     }
 
-    return make_pair(encoded, leftovers);
+    return {encoded, sequence.size()};
 }
 
 
@@ -117,11 +112,11 @@ void write_numbers(const vector<uint8_t> reference_values, const uint8_t& refere
 
 
 // author: Mateo Jakšić
-// function for geting nucleotide
+// function for getting nucleotide
 int get_nucleotide(const vector<uint8_t>& byte, int index) {
     uint8_t packed = byte[index/4];
-    int shift = 6 - 2 * (index % 4);  // Start from leftmost bits
-    return (packed >> shift) & 0b11;
+    int pos = 3 - (index % 4);  // Position within the byte, from right to left
+    return (packed >> (2 * pos)) & 0b11;
 }
 
 
@@ -138,102 +133,106 @@ int get_hash_value(const vector<uint8_t>& seq, int start, int k) {
 
 // author: Mateo Jakšić
 // function for creating hash table and finding matches with greedy algorithm
-// quick explanation: 
-void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>& T, int k) {
+// quick explanation: <to be added>
+// TODO: runcase ref=AAAAGCTTCG, targ=AAAATCTTCGAAC gives [(1,4),(8,2),(7,6),(1)] but should give [(1,4),(8,2),(7,4),(1,2),(1)]
+void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>& T, int k, int target_length) {
+    int s = 1 << (2 * k);
     int num_r = R.size() * 4;
-    int num_t = T.size() * 4;
+    int actual_target_length = target_length;
 
-    vector<int> h(num_r, 0);
-    vector<int> p(num_r, 0);
-    vector<Segment> segments;
+    vector<int> h(s, 0);
+    vector<int> p(num_r - k + 1, 0);
 
-    // Build hash table for reference sequence
-    for (int i = 0; i <= num_r - k; ++i) {
+    for (int i = 1; i <= num_r - k + 1; i++) {
         int v_r = 0;
-        for (int j = 0; j < k; ++j) {
-            v_r = v_r * 4 + get_nucleotide(R, i + j);
+        for (int j = 0; j < k; j++) {
+            v_r = (v_r << 2) | get_nucleotide(R, i + j - 1);
         }
-        p[i] = h[v_r % num_r];
-        h[v_r % num_r] = i;
+
+        p[i-1] = h[v_r % s];
+        h[v_r % s] = i;
     }
 
-    int i = 0;
-    int p_star = 0;
-    
-    while (i <= num_t - k) {
-        int v_t = 0;
-        for (int j = 0; j < k; ++j) {
-            v_t = v_t * 4 + get_nucleotide(T, i + j);
-        }
+    int i = 1;
+    int p_star = 1;
+    vector<Segment> segments;
 
-        int j = h[v_t % num_r];
-        int p_max = -1;
+    while (i <= actual_target_length) {
+        int p_max = 0;
         int l_max = 0;
 
-        while (j != 0) {
-            int l = 0;
-            while ((j + l < num_r) && (i + l < num_t) && 
-                   get_nucleotide(R, j + l) == get_nucleotide(T, i + l)) {
-                ++l;
+        if (i <= actual_target_length - 1) {
+            if (i <= actual_target_length - k + 1) {
+                int v_t = 0;
+                for (int j = 0; j < k; j++) {
+                    v_t = (v_t << 2) | get_nucleotide(T, i + j - 1);
+                }
+                int j = h[v_t % s];
+
+                while (j != 0) {
+                    int l = 0;
+                    while ((j + l - 1 < num_r) && (i + l - 1 < actual_target_length) && 
+                           get_nucleotide(R, j + l - 1) == get_nucleotide(T, i + l - 1)) {
+                        l++;
+                    }
+
+                    if (l >= 2 && l > l_max) {
+                        p_max = j;
+                        l_max = l;
+                    }
+                    j = p[j-1];
+                }
             }
-            
-            if (l >= k && l > l_max) {
-                p_max = j;
-                l_max = l;
+
+            if (l_max == 0) {
+                for (int r_pos = 1; r_pos <= num_r; r_pos++) {
+                    int l = 0;
+                    while ((r_pos + l - 1 < num_r) && (i + l - 1 < actual_target_length) && 
+                           get_nucleotide(R, r_pos + l - 1) == get_nucleotide(T, i + l - 1)) {
+                        l++;
+                    }
+                    
+                    if (l >= 2 && l > l_max) {
+                        p_max = r_pos;
+                        l_max = l;
+                    }
+                }
             }
-            j = p[j % num_r];
         }
 
-        if (l_max > 0) {
-            // Handle any mismatches before this match
+        if (l_max >= 2) {
             if (p_star < i) {
-                vector<int> mismatch_segment;
-                for (int index = p_star; index < i; ++index) {
-                    mismatch_segment.push_back(get_nucleotide(T, index));
+                string mismatch_str;
+                for (int idx = p_star - 1; idx < i - 1; idx++) {
+                    mismatch_str += to_string(get_nucleotide(T, idx));
                 }
-                if (!mismatch_segment.empty()) {
-                    segments.push_back(Segment{false, mismatch_segment});
-                }
+                segments.push_back(Segment{false, {stoi(mismatch_str)}});
             }
-            // Add the match
             segments.push_back(Segment{true, {p_max, l_max}});
+            
             p_star = i + l_max;
-            i += l_max;
+            i = i + l_max;
         } else {
-            vector<int> mismatch_segment;
-            mismatch_segment.push_back(get_nucleotide(T, i));
-            segments.push_back(Segment{false, mismatch_segment});
             i++;
         }
     }
 
-    // Handle remaining mismatches at the end
-    if (p_star < num_t) {
-        vector<int> mismatch_segment;
-        for (int index = p_star; index < num_t; ++index) {
-            mismatch_segment.push_back(get_nucleotide(T, index));
+    if (p_star <= actual_target_length) {
+        string mismatch_str;
+        for (int idx = p_star - 1; idx < actual_target_length; idx++) {
+            mismatch_str += to_string(get_nucleotide(T, idx));
         }
-        if (!mismatch_segment.empty()) {
-            segments.push_back(Segment{false, mismatch_segment});
+        if (!mismatch_str.empty()) {
+            segments.push_back(Segment{false, {stoi(mismatch_str)}});
         }
     }
 
-    // Output the segments
-    bool first = true;
     cout << "[";
-    for (const auto& seg : segments) {
-        if (!first) cout << ",";
-        if (seg.match) {
-            cout << "(" << seg.data[0] << "," << seg.data[1] << ")";
-        } else {
-            cout << "(";
-            for (size_t x = 0; x < seg.data.size(); ++x) {
-                cout << seg.data[x];
-                if (x + 1 < seg.data.size()) cout << ",";
-            }
-            cout << ")";
-        }
-        first = false;
+    for (size_t i = 0; i < segments.size(); ++i) {
+        if (i > 0) cout << ",";
+        const auto& seg = segments[i];
+        cout << "(" << (seg.match ? to_string(seg.data[0]) + "," + to_string(seg.data[1]) 
+                                  : to_string(seg.data[0])) << ")";
     }
     cout << "]" << endl;
 }
