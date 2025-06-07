@@ -29,4 +29,5 @@ void compress(const string& reference, const string& target) {
     // write_numbers(reference_values, reference_leftovers);
     // write_numbers(target_values, target_leftovers);
 
+    greedy_hash_table_matching(reference_values, target_values, 16);
 }
