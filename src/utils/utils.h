@@ -13,6 +13,6 @@ void write_numbers(const std::vector<uint8_t> reference_values, const uint8_t& r
 void create_hash_table(const std::vector<uint8_t>& values, int k, std::vector<int>& h, std::vector<int>& p);
 int get_nucleotide(const std::vector<uint8_t>& byte, int index);
 int get_hash_value(const std::vector<uint8_t>& seq, int start, int k);
-void greedy_hash_table_matching(const std::vector<uint8_t>& R, const std::vector<uint8_t>& T, int k, int target_length);
+void greedy_hash_table_matching(const std::vector<uint8_t>& R, const std::vector<uint8_t>& T, int k, int reference_length, int target_length);
 
 #endif

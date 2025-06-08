@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdint>
 #include <bitset>
+#include <algorithm>
 
 using namespace std;
 
@@ -132,13 +133,14 @@ int get_hash_value(const vector<uint8_t>& seq, int start, int k) {
 
 
 // author: Mateo Jakšić
-// function for creating hash table and finding matches with greedy algorithm
-// quick explanation: <to be added>
-// TODO: runcase ref=AAAAGCTTCG, targ=AAAATCTTCGAAC gives [(1,4),(8,2),(7,6),(1)] but should give [(1,4),(8,2),(7,4),(1,2),(1)]
-void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>& T, int k, int target_length) {
+// function for creating hash table and finding matches
+// quick explanation: function implements greedy algorithm between reference (R) and target (T) genome
+//                    using hash table method where we try to find and output matches (position, length),
+//                    keep in mind minimum length needs to be 2, and if we don't find them then we output 
+//                    mismatches (mismatched sequence)
+void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>& T, int k, int reference_length, int target_length) {
     int s = 1 << (2 * k);
-    int num_r = R.size() * 4;
-    int actual_target_length = target_length;
+    int num_r = reference_length;
 
     vector<int> h(s, 0);
     vector<int> p(num_r - k + 1, 0);
@@ -157,12 +159,12 @@ void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>&
     int p_star = 1;
     vector<Segment> segments;
 
-    while (i <= actual_target_length) {
+    while (i <= target_length) {
         int p_max = 0;
         int l_max = 0;
 
-        if (i <= actual_target_length - 1) {
-            if (i <= actual_target_length - k + 1) {
+        if (i <= target_length - 1) {
+            if (i <= target_length - k + 1) {
                 int v_t = 0;
                 for (int j = 0; j < k; j++) {
                     v_t = (v_t << 2) | get_nucleotide(T, i + j - 1);
@@ -171,7 +173,7 @@ void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>&
 
                 while (j != 0) {
                     int l = 0;
-                    while ((j + l - 1 < num_r) && (i + l - 1 < actual_target_length) && 
+                    while ((j + l - 1 < num_r) && (i + l - 1 < target_length) && 
                            get_nucleotide(R, j + l - 1) == get_nucleotide(T, i + l - 1)) {
                         l++;
                     }
@@ -187,7 +189,7 @@ void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>&
             if (l_max == 0) {
                 for (int r_pos = 1; r_pos <= num_r; r_pos++) {
                     int l = 0;
-                    while ((r_pos + l - 1 < num_r) && (i + l - 1 < actual_target_length) && 
+                    while ((r_pos + l - 1 < num_r) && (i + l - 1 < target_length) && 
                            get_nucleotide(R, r_pos + l - 1) == get_nucleotide(T, i + l - 1)) {
                         l++;
                     }
@@ -217,9 +219,9 @@ void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>&
         }
     }
 
-    if (p_star <= actual_target_length) {
+    if (p_star <= target_length) {
         string mismatch_str;
-        for (int idx = p_star - 1; idx < actual_target_length; idx++) {
+        for (int idx = p_star - 1; idx < target_length; idx++) {
             mismatch_str += to_string(get_nucleotide(T, idx));
         }
         if (!mismatch_str.empty()) {
