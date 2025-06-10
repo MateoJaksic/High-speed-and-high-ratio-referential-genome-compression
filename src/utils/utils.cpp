@@ -10,14 +10,16 @@
 
 using namespace std;
 
+
 // author: Mateo Jakšić
 // struct for storing compressed segments
-// quick explanation: if it's a match then we store position and lenght
+// quick explanation: if it's a match then we store position and length
 //                    if it's a missmatch then we store missmatches
 struct Segment {
     bool match;
     vector<int> data;
 };
+
 
 // author: Mateo Jakšić
 // function for reading file and converting to oneline string
@@ -113,11 +115,11 @@ void write_numbers(const vector<uint8_t> reference_values, const uint8_t& refere
 
 
 // author: Mateo Jakšić
-// function for getting nucleotide
-int get_nucleotide(const vector<uint8_t>& byte, int index) {
-    uint8_t packed = byte[index/4];
-    int pos = 3 - (index % 4);  // Position within the byte, from right to left
-    return (packed >> (2 * pos)) & 0b11;
+// function for getting nucleotide from packed format
+int get_nucleotide(const vector<uint8_t>& sequence, int index) {
+    uint8_t byte = sequence[index/4];
+    int position = 3 - (index % 4);
+    return (byte >> (2 * position)) & 0b11;
 }
 
 
@@ -138,103 +140,188 @@ int get_hash_value(const vector<uint8_t>& seq, int start, int k) {
 //                    using hash table method where we try to find and output matches (position, length),
 //                    keep in mind minimum length needs to be 2, and if we don't find them then we output 
 //                    mismatches (mismatched sequence)
-void greedy_hash_table_matching(const vector<uint8_t>& R, const vector<uint8_t>& T, int k, int reference_length, int target_length) {
-    int s = 1 << (2 * k);
-    int num_r = reference_length;
+void greedy_hash_table_matching(const vector<uint8_t>& reference, const vector<uint8_t>& target, int k, int reference_length, int target_length) {
+    int hash_size = 1 << (2 * k);
+    int reference_size = reference_length;
 
-    vector<int> h(s, 0);
-    vector<int> p(num_r - k + 1, 0);
+    vector<int> hash_table(hash_size, 0);
+    vector<int> positions(reference_size - k + 1, 0);
 
-    for (int i = 1; i <= num_r - k + 1; i++) {
-        int v_r = 0;
+    for (int i = 1; i <= reference_size - k + 1; i++) {
+        int reference_value = 0;
         for (int j = 0; j < k; j++) {
-            v_r = (v_r << 2) | get_nucleotide(R, i + j - 1);
+            reference_value = (reference_value << 2) | get_nucleotide(reference, i + j - 1);
         }
 
-        p[i-1] = h[v_r % s];
-        h[v_r % s] = i;
+        positions[i-1] = hash_table[reference_value % hash_size];
+        hash_table[reference_value % hash_size] = i;
     }
 
-    int i = 1;
-    int p_star = 1;
+    int current_position = 1;
+    int start_position = 1;
     vector<Segment> segments;
 
-    while (i <= target_length) {
-        int p_max = 0;
-        int l_max = 0;
+    while (current_position <= target_length) {
+        int max_position = 0;
+        int max_length = 0;
 
-        if (i <= target_length - 1) {
-            if (i <= target_length - k + 1) {
-                int v_t = 0;
+        if (current_position <= target_length - 1) {
+            if (current_position <= target_length - k + 1) {
+                int target_value = 0;
                 for (int j = 0; j < k; j++) {
-                    v_t = (v_t << 2) | get_nucleotide(T, i + j - 1);
+                    target_value = (target_value << 2) | get_nucleotide(target, current_position + j - 1);
                 }
-                int j = h[v_t % s];
+                int position = hash_table[target_value % hash_size];
 
-                while (j != 0) {
-                    int l = 0;
-                    while ((j + l - 1 < num_r) && (i + l - 1 < target_length) && 
-                           get_nucleotide(R, j + l - 1) == get_nucleotide(T, i + l - 1)) {
-                        l++;
+                while (position != 0) {
+                    int length = 0;
+                    while ((position + length - 1 < reference_size) && (current_position + length - 1 < target_length) && 
+                           get_nucleotide(reference, position + length - 1) == get_nucleotide(target, current_position + length - 1)) {
+                        length++;
                     }
 
-                    if (l >= 2 && l > l_max) {
-                        p_max = j;
-                        l_max = l;
+                    if (length >= 2 && length > max_length) {
+                        max_position = position;
+                        max_length = length;
                     }
-                    j = p[j-1];
+                    position = positions[position-1];
                 }
             }
 
-            if (l_max == 0) {
-                for (int r_pos = 1; r_pos <= num_r; r_pos++) {
-                    int l = 0;
-                    while ((r_pos + l - 1 < num_r) && (i + l - 1 < target_length) && 
-                           get_nucleotide(R, r_pos + l - 1) == get_nucleotide(T, i + l - 1)) {
-                        l++;
+            if (max_length == 0) {
+                for (int reference_position = 1; reference_position <= reference_size; reference_position++) {
+                    int length = 0;
+                    while ((reference_position + length - 1 < reference_size) && (current_position + length - 1 < target_length) && 
+                           get_nucleotide(reference, reference_position + length - 1) == get_nucleotide(target, current_position + length - 1)) {
+                        length++;
                     }
                     
-                    if (l >= 2 && l > l_max) {
-                        p_max = r_pos;
-                        l_max = l;
+                    if (length >= 2 && length > max_length) {
+                        max_position = reference_position;
+                        max_length = length;
                     }
                 }
             }
         }
 
-        if (l_max >= 2) {
-            if (p_star < i) {
-                string mismatch_str;
-                for (int idx = p_star - 1; idx < i - 1; idx++) {
-                    mismatch_str += to_string(get_nucleotide(T, idx));
+        if (max_length >= 2) {
+            if (start_position < current_position) {
+                string mismatch_sequence;
+                for (int index = start_position - 1; index < current_position - 1; index++) {
+                    mismatch_sequence += to_string(get_nucleotide(target, index));
                 }
-                segments.push_back(Segment{false, {stoi(mismatch_str)}});
+                segments.push_back(Segment{false, {stoi(mismatch_sequence)}});
             }
-            segments.push_back(Segment{true, {p_max, l_max}});
+            segments.push_back(Segment{true, {max_position, max_length}});
             
-            p_star = i + l_max;
-            i = i + l_max;
+            start_position = current_position + max_length;
+            current_position = current_position + max_length;
         } else {
-            i++;
+            current_position++;
         }
     }
 
-    if (p_star <= target_length) {
-        string mismatch_str;
-        for (int idx = p_star - 1; idx < target_length; idx++) {
-            mismatch_str += to_string(get_nucleotide(T, idx));
+    if (start_position <= target_length) {
+        string mismatch_sequence;
+        for (int index = start_position - 1; index < target_length; index++) {
+            mismatch_sequence += to_string(get_nucleotide(target, index));
         }
-        if (!mismatch_str.empty()) {
-            segments.push_back(Segment{false, {stoi(mismatch_str)}});
+        if (!mismatch_sequence.empty()) {
+            segments.push_back(Segment{false, {stoi(mismatch_sequence)}});
         }
     }
 
     cout << "[";
     for (size_t i = 0; i < segments.size(); ++i) {
         if (i > 0) cout << ",";
-        const auto& seg = segments[i];
-        cout << "(" << (seg.match ? to_string(seg.data[0]) + "," + to_string(seg.data[1]) 
-                                  : to_string(seg.data[0])) << ")";
+        const auto& segment = segments[i];
+        cout << "(" << (segment.match ? to_string(segment.data[0]) + "," + to_string(segment.data[1]) 
+                                  : to_string(segment.data[0])) << ")";
     }
-    cout << "]" << endl;
+    cout << "]";
+}
+
+
+// author: Mateo Jakšić
+// function for reading compressed file
+// quick explanation: we read line from compressed file and convert it in format
+//                    where we have vector<bool> that stores information if it's
+//                    a match or a mismatch, and vector<vector<int>> that stores 
+//                    (position, length) for match or (sequence) for mismatch
+pair<vector<vector<int>>,vector<bool>> read_compressed_sequence(const string& path) {
+    ifstream file(path);
+    string line;
+    vector<vector<int>> segments;
+    vector<bool> matches;
+    string length;
+    vector<int> segment;
+    bool is_match = false;
+    bool is_segment = false;
+    
+    getline(file, line);
+
+    for (char c : line) {
+        if (c == '[') {
+            continue;
+        } 
+        else if (c == '(') {
+            segment.clear();
+            is_segment = true;
+        }
+        else if (isdigit(c)) {
+            if (!is_match) {
+                segment.push_back(stoi(string(1, c)));
+            } else {
+                length = c;
+            }   
+        }
+        else if (c == ',' && is_segment) {
+            is_match = true;
+        }
+        else if (c == ')') {
+            if (is_match) {
+                matches.push_back(is_match);
+                is_match = false;
+
+                segment.push_back(stoi(length));
+                segments.push_back(segment);
+            } else {
+                matches.push_back(is_match);
+                segments.push_back(segment);
+            }
+            is_segment = false;
+        }
+        else if (c == ']') {
+            break;
+        }
+    }
+    
+    return make_pair(segments, matches);
+}
+
+
+// author: Mateo Jakšić
+// function for reassembling genome sequence
+// quick explanation: function takes compressed segments and reference genome
+//                   if it's a match then we copy nucleotides from reference
+//                   if it's a mismatch then we use the mismatched nucleotide
+void reassembly_sequence(const vector<vector<int>>& segments, const vector<bool>& matches, const vector<uint8_t>& reference) {
+    vector<uint8_t> result;
+    
+    for (size_t i = 0; i < matches.size(); ++i) {
+        
+        if (matches[i]) {
+            int position = segments[i][0];
+            int length = segments[i][1];
+            
+            for (int j = 0; j < length; ++j) {
+                result.push_back(get_nucleotide(reference, position + j - 1));
+            }
+        } else {
+            for(int nucleotide : segments[i]) {
+                result.push_back(nucleotide);
+            }
+        }
+    }
+    cout << numbers_to_nucleotides(result);
 }
