@@ -32,6 +32,6 @@ fi
 make -C src/compress || { echo "Error: Build failed. Exiting."; exit 1; }
 
 # run compression
-./src/compress/compressor "$REFERENCE" "$TARGET" > "$OUTPUT"
+{ time ./src/compress/compressor "$REFERENCE" "$TARGET" > "$OUTPUT"; } 2>&1
 
 # author: Mateo Jakšić

@@ -32,6 +32,6 @@ fi
 make -C src/decompress || { echo "Error: Build failed. Exiting."; exit 1; }
 
 # run decompression
-./src/decompress/decompressor "$REFERENCE" "$COMPRESSED" > "$OUTPUT"
+{ time ./src/decompress/decompressor "$REFERENCE" "$COMPRESSED" > "$OUTPUT"; } 2>&1
 
 # author: Mateo Jakšić
