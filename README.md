@@ -32,13 +32,23 @@ chmod +x run_decompress.sh
 ```bash
 ./run_compress.sh -r reference_file -t target_file -o output_file
 ./run_decompress.sh -r reference_file -c compressed_file -o output_file
+./run_evaluate.sh -t target_genome -d decompressed_genome -o output_file
 ```
 
-4. Run scripts with real data (using ASM1038v1 target genome)
+4. Run scripts with simple data
 
 ```bash
-./run_compress.sh -r data/reference.fna -t data/target_ASM1038v1.fna -o compress_output.txt
-./run_decompress.sh -r data/reference.fna -c compress_output.txt -o decompress_output.txt
+./run_compress.sh -r data/simple_reference.fna -t data/simple_target.fna -o outputs/simple_compress_output.txt
+./run_decompress.sh -r data/simple_reference.fna -c outputs/simple_compress_output.txt -o outputs/simple_decompress_output.txt
+./run_evaluate.sh -t data/simple_target.fna -d outputs/simple_decompress_output.txt -o outputs/simple_evaluate_output.txt
+```
+
+5. Run scripts with real data, example using ASM1038v1 target genome
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM1038v1.fna -o outputs/ASM1038v1_compress_output.txt
+./run_decompress.sh -r data/reference.fna -c outputs/ASM1038v1_compress_output.txt -o outputs/ASM1038v1_decompress_output.txt
+./run_evaluate.sh -t data/target_ASM1038v1.fna -d outputs/ASM1038v1_decompress_output.txt -o outputs/ASM1038v1_evaluate_output.txt
 ```
 
 ## License
