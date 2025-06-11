@@ -43,12 +43,46 @@ chmod +x run_decompress.sh
 ./run_evaluate.sh -t data/simple_target.fna -d outputs/simple_decompress_output.txt -o outputs/simple_evaluate_output.txt
 ```
 
-5. Run scripts with real data, example using ASM1038v1 target genome
+5. Run scripts with real data 
+
+5.1. Example using ASM1038v1 target genome
 
 ```bash
 ./run_compress.sh -r data/reference.fna -t data/target_ASM1038v1.fna -o outputs/ASM1038v1_compress_output.txt
 ./run_decompress.sh -r data/reference.fna -c outputs/ASM1038v1_compress_output.txt -o outputs/ASM1038v1_decompress_output.txt
 ./run_evaluate.sh -t data/target_ASM1038v1.fna -d outputs/ASM1038v1_decompress_output.txt -o outputs/ASM1038v1_evaluate_output.txt
+```
+
+5.2. Example using ASM1326v1 target genome
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM1326v1.fna -o outputs/ASM1326v1_compress_output.txt
+./run_decompress.sh -r data/reference.fna -c outputs/ASM1326v1_compress_output.txt -o outputs/ASM1326v1_decompress_output.txt
+./run_evaluate.sh -t data/target_ASM1326v1.fna -d outputs/ASM1326v1_decompress_output.txt -o outputs/ASM1326v1_evaluate_output.txt
+```
+
+5.3. Example using ASM21047v1 target genome
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM21047v1.fna -o outputs/ASM21047v1_compress_output.txt
+./run_decompress.sh -r data/reference.fna -c outputs/ASM21047v1_compress_output.txt -o outputs/ASM21047v1_decompress_output.txt
+./run_evaluate.sh -t data/target_ASM21047v1.fna -d outputs/ASM21047v1_decompress_output.txt -o outputs/ASM21047v1_evaluate_output.txt
+```
+
+5.4. Example using ASM285371v1 target genome
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM285371v1.fna -o outputs/ASM285371v1_compress_output.txt
+./run_decompress.sh -r data/reference.fna -c outputs/ASM285371v1_compress_output.txt -o outputs/ASM285371v1_decompress_output.txt
+./run_evaluate.sh -t data/target_ASM285371v1.fna -d outputs/ASM285371v1_decompress_output.txt -o outputs/ASM285371v1_evaluate_output.txt
+```
+
+5.5. Example using ASM369716v2 target genome
+
+```bash
+./run_compress.sh -r data/reference.fna -t data/target_ASM369716v2.fna -o outputs/ASM369716v2_compress_output.txt
+./run_decompress.sh -r data/reference.fna -c outputs/ASM369716v2_compress_output.txt -o outputs/ASM369716v2_decompress_output.txt
+./run_evaluate.sh -t data/target_ASM369716v2.fna -d outputs/ASM369716v2_decompress_output.txt -o outputs/ASM369716v2_evaluate_output.txt
 ```
 
 ## License
