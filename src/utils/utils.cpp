@@ -235,8 +235,11 @@ void greedy_hash_table_matching(const vector<uint8_t>& reference, const vector<u
     for (size_t i = 0; i < segments.size(); ++i) {
         if (i > 0) cout << ",";
         const auto& segment = segments[i];
-        cout << "(" << (segment.match ? to_string(segment.data[0]) + "," + to_string(segment.data[1]) 
-                                  : to_string(segment.data[0])) << ")";
+        if (segment.match) {
+            cout << "(" << segment.data[0] << "," << segment.data[1] << ")";
+        } else {
+            cout << "(" << segment.data[0] << ")";
+        }
     }
     cout << "]";
 }
@@ -253,7 +256,7 @@ pair<vector<vector<int>>,vector<bool>> read_compressed_sequence(const string& pa
     string line;
     vector<vector<int>> segments;
     vector<bool> matches;
-    string length;
+    string current_number;
     vector<int> segment;
     bool is_match = false;
     bool is_segment = false;
@@ -266,29 +269,27 @@ pair<vector<vector<int>>,vector<bool>> read_compressed_sequence(const string& pa
         } 
         else if (c == '(') {
             segment.clear();
+            current_number = "";
             is_segment = true;
         }
         else if (isdigit(c)) {
-            if (!is_match) {
-                segment.push_back(stoi(string(1, c)));
-            } else {
-                length = c;
-            }   
+            current_number += c;
         }
         else if (c == ',' && is_segment) {
+            if (!current_number.empty()) {
+                segment.push_back(stoi(current_number));
+                current_number = "";
+            }
             is_match = true;
         }
         else if (c == ')') {
-            if (is_match) {
-                matches.push_back(is_match);
-                is_match = false;
-
-                segment.push_back(stoi(length));
-                segments.push_back(segment);
-            } else {
-                matches.push_back(is_match);
-                segments.push_back(segment);
+            if (!current_number.empty()) {
+                segment.push_back(stoi(current_number));
+                current_number = "";
             }
+            matches.push_back(is_match);
+            segments.push_back(segment);
+            is_match = false;
             is_segment = false;
         }
         else if (c == ']') {
@@ -303,8 +304,8 @@ pair<vector<vector<int>>,vector<bool>> read_compressed_sequence(const string& pa
 // author: Mateo Jakšić
 // function for reassembling genome sequence
 // quick explanation: function takes compressed segments and reference genome
-//                   if it's a match then we copy nucleotides from reference
-//                   if it's a mismatch then we use the mismatched nucleotide
+//                    if it's a match then we copy nucleotides from reference
+//                    if it's a mismatch then we use the mismatched nucleotide
 void reassembly_sequence(const vector<vector<int>>& segments, const vector<bool>& matches, const vector<uint8_t>& reference) {
     vector<uint8_t> result;
     
