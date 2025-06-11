@@ -1,0 +1,1 @@
+Kompresija i dekompresija rade sa 100% točnosti.

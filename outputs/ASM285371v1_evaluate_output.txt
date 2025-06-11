@@ -1,1 +1,1 @@
-Kompresija i dekompresija rade sa 9.16923% točnosti.
+Kompresija i dekompresija rade sa 100% točnosti.
